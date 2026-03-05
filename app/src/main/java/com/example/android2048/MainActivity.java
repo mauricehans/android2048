@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import java.util.Random;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +27,6 @@ public class MainActivity extends AppCompatActivity {
         jeu.matrice[0][0] = 2;
         jeu.matrice[2][3] = 8;
         Log.d("2048", "=== MATRICE INITIALE ===");
-        jeu.affiche();  // Version Log pour Android
+        jeu.afficheterminal();  // Version Log pour Android
     }
 }
