@@ -1,7 +1,7 @@
 package com.example.android2048;
 
 import android.os.Bundle;
-
+import android.util.Log;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -19,6 +19,12 @@ public class MainActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+
         });
+        map jeu = new map();
+        jeu.matrice[0][0] = 2;
+        jeu.matrice[2][3] = 8;
+        Log.d("2048", "=== MATRICE INITIALE ===");
+        jeu.affiche();  // Version Log pour Android
     }
 }
