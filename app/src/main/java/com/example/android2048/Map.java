@@ -1,11 +1,11 @@
 package com.example.android2048;
 import java.util.Random;
 
-public class map {
+public class Map {
     int[][] matrice = new int[4][4];
 
     // Constructeur : initialise 2 tuiles aléatoires
-    public map() {
+    public Map() {
         Random rand = new Random();
 
         // Première case aléatoire
