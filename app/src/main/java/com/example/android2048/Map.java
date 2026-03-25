@@ -5,7 +5,8 @@ import java.util.Random;
 public class Map {
     int[][] matrice = new int[4][4];
     int score = 0;
-    boolean gameWon = false;
+    int objectif = 2048;
+    boolean objectifAtteint = false;
 
     public Map() {
         Random rand = new Random();
@@ -63,32 +64,6 @@ public class Map {
         return true;
     }
 
-    public boolean droite() {
-        int[][] avant = copier();
-        for (int i = 0; i < 4; i++) {
-            int[] ligne = new int[4];
-            int pos = 3;
-            for (int j = 3; j >= 0; j--)
-                if (matrice[i][j] != 0) ligne[pos--] = matrice[i][j];
-            for (int j = 3; j > 0; j--) {
-                if (ligne[j] != 0 && ligne[j] == ligne[j - 1]) {
-                    ligne[j] *= 2;
-                    score += ligne[j];
-                    if (ligne[j] == 2048) gameWon = true;
-                    ligne[j - 1] = 0;
-                    j--;
-                }
-            }
-            int[] result = new int[4];
-            pos = 3;
-            for (int j = 3; j >= 0; j--)
-                if (ligne[j] != 0) result[pos--] = ligne[j];
-            matrice[i] = result;
-        }
-        if (!matricesEgales(avant, matrice)) { ajouterTuile(); return true; }
-        return false;
-    }
-
     public boolean gauche() {
         int[][] avant = copier();
         for (int i = 0; i < 4; i++) {
@@ -100,7 +75,8 @@ public class Map {
                 if (ligne[j] != 0 && ligne[j] == ligne[j + 1]) {
                     ligne[j] *= 2;
                     score += ligne[j];
-                    if (ligne[j] == 2048) gameWon = true;
+                    if (!objectifAtteint && score >= objectif)
+                        objectifAtteint = true;
                     ligne[j + 1] = 0;
                     j++;
                 }
@@ -109,6 +85,33 @@ public class Map {
             pos = 0;
             for (int j = 0; j < 4; j++)
                 if (ligne[j] != 0) result[pos++] = ligne[j];
+            matrice[i] = result;
+        }
+        if (!matricesEgales(avant, matrice)) { ajouterTuile(); return true; }
+        return false;
+    }
+
+    public boolean droite() {
+        int[][] avant = copier();
+        for (int i = 0; i < 4; i++) {
+            int[] ligne = new int[4];
+            int pos = 3;
+            for (int j = 3; j >= 0; j--)
+                if (matrice[i][j] != 0) ligne[pos--] = matrice[i][j];
+            for (int j = 3; j > 0; j--) {
+                if (ligne[j] != 0 && ligne[j] == ligne[j - 1]) {
+                    ligne[j] *= 2;
+                    score += ligne[j];
+                    if (!objectifAtteint && score >= objectif)
+                        objectifAtteint = true;
+                    ligne[j - 1] = 0;
+                    j--;
+                }
+            }
+            int[] result = new int[4];
+            pos = 3;
+            for (int j = 3; j >= 0; j--)
+                if (ligne[j] != 0) result[pos--] = ligne[j];
             matrice[i] = result;
         }
         if (!matricesEgales(avant, matrice)) { ajouterTuile(); return true; }
@@ -126,7 +129,8 @@ public class Map {
                 if (col[i] != 0 && col[i] == col[i + 1]) {
                     col[i] *= 2;
                     score += col[i];
-                    if (col[i] == 2048) gameWon = true;
+                    if (!objectifAtteint && score >= objectif)
+                        objectifAtteint = true;
                     col[i + 1] = 0;
                     i++;
                 }
@@ -152,7 +156,8 @@ public class Map {
                 if (col[i] != 0 && col[i] == col[i - 1]) {
                     col[i] *= 2;
                     score += col[i];
-                    if (col[i] == 2048) gameWon = true;
+                    if (!objectifAtteint && score >= objectif)
+                        objectifAtteint = true;
                     col[i - 1] = 0;
                     i--;
                 }

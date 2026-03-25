@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         board.setHasFixedSize(true);
         board.setAdapter(adapter);
         updateBoardUI();
+        updateScoreUI();
 
         gestureDetector = new GestureDetectorCompat(this,
                 new GestureDetector.SimpleOnGestureListener() {
@@ -58,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onFling(@Nullable MotionEvent e1,
                                            @NonNull  MotionEvent e2,
                                            float velocityX, float velocityY) {
+                        if (e1 == null) return false;
+
                         float Y = e2.getY() - e1.getY();
                         float X = e2.getX() - e1.getX();
                         boolean moved = false;
@@ -71,12 +74,14 @@ public class MainActivity extends AppCompatActivity {
                         if (moved) {
                             updateBoardUI();
                             updateScoreUI();
-                            if (jeu.gameWon) {
-                                afficherDialogue("Victoire ! 🎉",
-                                        "Tu as atteint 2048 !\nScore : " + jeu.score);
+
+                            if (jeu.objectifAtteint) {
+                                int objectifAtteint = jeu.objectif;
+                                jeu.objectif *= 2;
+                                jeu.objectifAtteint = false;
+                                afficherObjectif(objectifAtteint, jeu.objectif);
                             } else if (!jeu.peutJouer()) {
-                                afficherDialogue("Game Over",
-                                        "Plus aucun mouvement possible.\nScore final : " + jeu.score);
+                                afficherGameOver();
                             }
                         }
                         return true;
@@ -101,10 +106,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void afficherDialogue(String titre, String message) {
+    private void afficherObjectif(int atteint, int prochain) {
         new AlertDialog.Builder(this)
-                .setTitle(titre)
-                .setMessage(message)
+                .setTitle("🎉 Objectif atteint !")
+                .setMessage("Bravo ! Tu as atteint un score de " + atteint + " !\n\n"
+                        + "Nouvel objectif : " + prochain)
+                .setPositiveButton("Continuer", null)
+                .setCancelable(false)
+                .show();
+    }
+
+    private void afficherGameOver() {
+        new AlertDialog.Builder(this)
+                .setTitle("💀 Game Over")
+                .setMessage("Plus aucun mouvement possible.\nScore final : " + jeu.score)
                 .setPositiveButton("Rejouer", (dialog, which) -> {
                     jeu = new Map();
                     updateBoardUI();
