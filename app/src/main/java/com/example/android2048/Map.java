@@ -1,4 +1,10 @@
 package com.example.android2048;
+import static android.content.ContentValues.TAG;
+
+import android.util.Log;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class Map {
@@ -22,6 +28,22 @@ public class Map {
         // Placer les tuiles
         matrice[i1][j1] = choisirValeur(rand);
         matrice[i2][j2] = choisirValeur(rand);
+    }
+
+    public void stringToDeep(String strMat) {
+        int i = 0;
+        int j = 0;
+        strMat = strMat.replace("[[", "").replace("]]", "");
+        String[] strMatList = strMat.split("], \\[");
+        for (String row : strMatList) {
+            String[] strRow = row.split(", ");
+            for (String value: strRow) {
+                matrice[i][j] = Integer.parseInt(value);
+                j++;
+            }
+            j = 0;
+            i++;
+        }
     }
 
     // 90% chance de 2, 10% chance de 4
