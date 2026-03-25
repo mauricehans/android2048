@@ -1,15 +1,14 @@
 package com.example.android2048;
 
-import static android.content.ContentValues.TAG;
-
 import android.os.Bundle;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GestureDetectorCompat;
@@ -21,57 +20,97 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class MainActivity extends AppCompatActivity {
+
     private TileAdapter adapter;
     private GestureDetectorCompat gestureDetector;
+    private TextView scoreView, bestView;
+    private int bestScore = 0;
+    private Map jeu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
-
         });
 
-        Map jeu = new Map();
-        jeu.afficheterminal();
+        scoreView = findViewById(R.id.score_value);
+        bestView  = findViewById(R.id.best_value);
+
+        jeu = new Map();
         adapter = new TileAdapter();
+
         RecyclerView board = findViewById(R.id.board);
         board.setLayoutManager(new GridLayoutManager(this, 4));
         board.setHasFixedSize(true);
         board.setAdapter(adapter);
-        updateBoardUI(jeu.matrice);
+        updateBoardUI();
 
-        gestureDetector = new GestureDetectorCompat(this, new GestureDetector.SimpleOnGestureListener(){
-            @Override
-            public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
-                float Y = e2.getY() - e1.getY();
-                float X = e2.getX() - e1.getX();
-                if (Math.abs(Y) > Math.abs(X) && Math.abs(Y) > 100) {
-                    if (Y > 0) jeu.bas();
-                    else jeu.haut();
-                }
-                else if (Math.abs(X) > Math.abs(Y) && Math.abs(X) > 100) {
-                    if (X > 0) jeu.droite();
-                    else jeu.gauche();
-                }
-                updateBoardUI(jeu.matrice);
-                return true;
-            }
-        });
+        gestureDetector = new GestureDetectorCompat(this,
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onFling(@Nullable MotionEvent e1,
+                                           @NonNull  MotionEvent e2,
+                                           float velocityX, float velocityY) {
+                        float Y = e2.getY() - e1.getY();
+                        float X = e2.getX() - e1.getX();
+                        boolean moved = false;
+
+                        if (Math.abs(Y) > Math.abs(X) && Math.abs(Y) > 100) {
+                            moved = (Y > 0) ? jeu.bas() : jeu.haut();
+                        } else if (Math.abs(X) > Math.abs(Y) && Math.abs(X) > 100) {
+                            moved = (X > 0) ? jeu.droite() : jeu.gauche();
+                        }
+
+                        if (moved) {
+                            updateBoardUI();
+                            updateScoreUI();
+                            if (jeu.gameWon) {
+                                afficherDialogue("Victoire ! 🎉",
+                                        "Tu as atteint 2048 !\nScore : " + jeu.score);
+                            } else if (!jeu.peutJouer()) {
+                                afficherDialogue("Game Over",
+                                        "Plus aucun mouvement possible.\nScore final : " + jeu.score);
+                            }
+                        }
+                        return true;
+                    }
+                });
+
         board.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 
-    private void updateBoardUI(int[][] matrice) {
-        List<Integer> flatMat = new ArrayList<>();
-        for (int[] col : matrice) {
-            for (int row : col) flatMat.add(row);
+    private void updateBoardUI() {
+        List<Integer> flat = new ArrayList<>();
+        for (int[] row : jeu.matrice)
+            for (int val : row) flat.add(val);
+        adapter.submitList(flat);
+    }
+
+    private void updateScoreUI() {
+        scoreView.setText(String.valueOf(jeu.score));
+        if (jeu.score > bestScore) {
+            bestScore = jeu.score;
+            bestView.setText(String.valueOf(bestScore));
         }
-        Log.d(TAG, flatMat.toString());
-        adapter.submitList(flatMat);
+    }
+
+    private void afficherDialogue(String titre, String message) {
+        new AlertDialog.Builder(this)
+                .setTitle(titre)
+                .setMessage(message)
+                .setPositiveButton("Rejouer", (dialog, which) -> {
+                    jeu = new Map();
+                    updateBoardUI();
+                    updateScoreUI();
+                })
+                .setCancelable(false)
+                .show();
     }
 }
