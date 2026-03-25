@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+import android.graphics.Color;
 
 public class TileAdapter extends ListAdapter<Integer, TileAdapter.TileViewHolder> {
     public TileAdapter() {
@@ -37,6 +38,19 @@ public class TileAdapter extends ListAdapter<Integer, TileAdapter.TileViewHolder
     public void onBindViewHolder(@NonNull TileViewHolder holder, int position) {
         Integer value = getItem(position);
         holder.bind(value);
+
+        holder.itemView.animate().cancel();  // On annule, pour passer outre le recyclage
+        /*if (value > 0) {
+            holder.itemView.setScaleX(0.8f);
+            holder.itemView.setScaleY(0.8f);
+            holder.itemView.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
+        }
+        else {
+            // 3. IMPORTANT : Si la case est vide (0), on s'assure qu'elle reprend sa taille normale
+            // Sinon, les cases vides recyclées resteront à 0.8f
+            holder.itemView.setScaleX(1f);
+            holder.itemView.setScaleY(1f);
+        }*/
     }
 
     static class TileViewHolder extends RecyclerView.ViewHolder {
@@ -51,59 +65,59 @@ public class TileAdapter extends ListAdapter<Integer, TileAdapter.TileViewHolder
             switch (value) {
                 case 0:
                     tile.setText("");
-                    tile.setBackgroundColor(0xFFCDC1B4);
+                    tile.setBackgroundColor(Color.parseColor("#f3ccff"));
                     break;
                 case 2:
                     tile.setText("2");
-                    tile.setBackgroundColor(0xFFCDC1B4);
+                    tile.setBackgroundColor(Color.parseColor("#F2EF8A"));
                     break;
                 case 4:
                     tile.setText("4");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#f7f36f"));
                     break;
                 case 8:
                     tile.setText("8");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#ffef3b"));
                     break;
                 case 16:
                     tile.setText("16");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#ffcc00"));
                     break;
                 case 32:
                     tile.setText("32");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#ffc757"));
                     break;
                 case 64:
                     tile.setText("64");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#ffc757"));
                     break;
                 case 128:
                     tile.setText("128");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#ffbc75"));
                     break;
                 case 256:
                     tile.setText("256");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#ffa600"));
                     break;
                 case 512:
                     tile.setText("512");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#ffba91"));
                     break;
                 case 1024:
                     tile.setText("1024");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#ff9900"));
                     break;
                 case 2048:
                     tile.setText("2048");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#a82ed9"));
                     break;
                 case 4096:
                     tile.setText("4096");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#ff6e30"));
                     break;
                 case 8192:
                     tile.setText("8192");
-                    tile.setBackgroundColor(0xFFF2B179);
+                    tile.setBackgroundColor(Color.parseColor("#ff351f"));
                     break;
             }
         }
