@@ -29,8 +29,12 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Map jeu;
     private TileAdapter adapter;
+    private TextView scoreView, bestView;
+    private int bestScore;
     private GestureDetectorCompat gestureDetector;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,11 +50,13 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences gameSave = getSharedPreferences("game_save", Context.MODE_PRIVATE);
         int score = gameSave.getInt("score", 0);
+        bestScore = gameSave.getInt("best_score", 0);
         String strMat = gameSave.getString("jeu", null);
 
         jeu = new Map();
         scoreView = findViewById(R.id.score_value);
         bestView  = findViewById(R.id.best_value);
+        bestView.setText(String.valueOf(bestScore));
 
         jeu = new Map();
         adapter = new TileAdapter();
@@ -59,10 +65,13 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle("Resume ?")
                 .setMessage("Voulez-vous reprendre la partie ?")
                 .setPositiveButton("Oui", (dialog, which) -> {
+                    assert strMat != null;
                     jeu.stringToDeep(strMat);
-                    updateBoardUI(jeu.matrice);
+                    jeu.score = score;
+                    updateBoardUI();
+                    updateScoreUI();
                 })
-                .setNegativeButton("Non", (dialog, which) -> finish());
+                .setNegativeButton("Non", (dialog, which) -> {});
 
         if (strMat != null) builder.show();
 
@@ -114,18 +123,22 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        super.onDestroy();
+        super.onPause();
         SharedPreferences gameSave = getSharedPreferences("game_save", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = gameSave.edit();
-        editor.putInt("score", 56);
+        editor.putInt("score", jeu.score);
+        editor.putInt("best_score", bestScore);
         editor.putString("jeu", Arrays.deepToString(jeu.matrice));
         editor.apply();
     }
 
-    private List<Integer> flatten(int[][] matrice) {
+    /*private List<Integer> flatten(int[][] matrice) {
         List<Integer> flatMat = new ArrayList<>();
         for (int[] col : matrice) {
             for (int row : col) flatMat.add(row);
+        }
+        return flatMat;
+    }*/
 
     private void updateBoardUI() {
         List<Integer> flat = new ArrayList<>();
@@ -140,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
             bestScore = jeu.score;
             bestView.setText(String.valueOf(bestScore));
         }
-        return flatMat;
     }
 
     private void afficherObjectif(int atteint, int prochain) {

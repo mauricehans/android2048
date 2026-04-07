@@ -1,11 +1,7 @@
 package com.example.android2048;
-import static android.content.ContentValues.TAG;
-
-import android.util.Log;
 
 import java.util.Arrays;
 import java.util.List;
-
 import java.util.Random;
 
 public class Map {
@@ -14,43 +10,19 @@ public class Map {
     int objectif = 2048;
     boolean objectifAtteint = false;
 
-    // Constructeur : initialise 2 tuiles aléatoires
     public Map() {
         Random rand = new Random();
-
-        // Première case aléatoire
         int i1 = rand.nextInt(4);
         int j1 = rand.nextInt(4);
-
-        // Deuxième case différente de la première
         int i2, j2;
         do {
             i2 = rand.nextInt(4);
             j2 = rand.nextInt(4);
         } while (i2 == i1 && j2 == j1);
-
-        // Placer les tuiles
         matrice[i1][j1] = choisirValeur(rand);
         matrice[i2][j2] = choisirValeur(rand);
     }
 
-    public void stringToDeep(String strMat) {
-        int i = 0;
-        int j = 0;
-        strMat = strMat.replace("[[", "").replace("]]", "");
-        String[] strMatList = strMat.split("], \\[");
-        for (String row : strMatList) {
-            String[] strRow = row.split(", ");
-            for (String value: strRow) {
-                matrice[i][j] = Integer.parseInt(value);
-                j++;
-            }
-            j = 0;
-            i++;
-        }
-    }
-
-    // 90% chance de 2, 10% chance de 4
     private int choisirValeur(Random rand) {
         return rand.nextInt(10) < 9 ? 2 : 4;
     }
@@ -128,7 +100,6 @@ public class Map {
             int pos = 3;
             for (int j = 3; j >= 0; j--)
                 if (matrice[i][j] != 0) ligne[pos--] = matrice[i][j];
-            }
             for (int j = 3; j > 0; j--) {
                 if (ligne[j] != 0 && ligne[j] == ligne[j - 1]) {
                     ligne[j] *= 2;
@@ -143,7 +114,6 @@ public class Map {
             pos = 3;
             for (int j = 3; j >= 0; j--)
                 if (ligne[j] != 0) result[pos--] = ligne[j];
-            }
             matrice[i] = result;
         }
         if (!matricesEgales(avant, matrice)) { ajouterTuile(); return true; }
@@ -202,5 +172,25 @@ public class Map {
         }
         if (!matricesEgales(avant, matrice)) { ajouterTuile(); return true; }
         return false;
+    }
+
+    public void stringToDeep(String strMat) {// 1. Nettoyage : On enlève les doubles crochets extérieurs [[ et ]]
+        String cleaned = strMat.replace("[[", "").replace("]]", "").replace(" ", "");
+        String[] lignes = cleaned.split("\\], \\[" );
+
+        if (lignes.length == 1) {
+            lignes = cleaned.split("\\],\\[");
+        }
+
+        for (int i = 0; i < lignes.length && i < 4; i++) {
+            String[] valeurs = lignes[i].split(",");
+            for (int j = 0; j < valeurs.length && j < 4; j++) {
+                try {
+                    this.matrice[i][j] = Integer.parseInt(valeurs[j]);
+                } catch (NumberFormatException e) {
+                    this.matrice[i][j] = 0; // Sécurité si le String est corrompu
+                }
+            }
+        }
     }
 }
