@@ -22,6 +22,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.android2048.scoreBD.AppDB;
+import com.example.android2048.scoreBD.ScoreDAO;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,11 +51,14 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+        /* **** PERSISTANCE ***** */
         SharedPreferences gameSave = getSharedPreferences("game_save", Context.MODE_PRIVATE);
         int score = gameSave.getInt("score", 0);
         bestScore = gameSave.getInt("best_score", 0);
         String strMat = gameSave.getString("jeu", null);
-
+        AppDB db = AppDB.getInstance(getApplicationContext());
+        ScoreDAO DAO = db.scoreDAO();
+        /* **** PERSISTANCE ***** */
         jeu = new Map();
         scoreView = findViewById(R.id.score_value);
         bestView  = findViewById(R.id.best_value);
