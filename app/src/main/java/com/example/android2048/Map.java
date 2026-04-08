@@ -1,11 +1,9 @@
 package com.example.android2048;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 public class Map {
-    int[][] matrice = new int[4][4];
+    final int[][] matrice = new int[4][4];
     int score = 0;
     int objectif = 2048;
     boolean objectifAtteint = false;

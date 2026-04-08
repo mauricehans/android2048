@@ -10,7 +10,7 @@ import java.util.List;
 @Dao
 public interface ScoreDAO {
     @Insert
-    public void insert(ScoreEntity score);
+    void insert(ScoreEntity score);
     @Query("SELECT * FROM score ORDER BY score DESC LIMIT :limit")
     List<ScoreEntity> getScores(int limit);
     @Query("DELETE FROM score")
