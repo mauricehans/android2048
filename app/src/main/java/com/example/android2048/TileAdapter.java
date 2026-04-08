@@ -1,5 +1,6 @@
 package com.example.android2048;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,7 @@ public class TileAdapter extends ListAdapter<Integer, TileAdapter.TileViewHolder
         super(DIFF_CALLBACK);
     }
 
-    private static final DiffUtil.ItemCallback<Integer> DIFF_CALLBACK = new DiffUtil.ItemCallback<Integer>() {
+    private static final DiffUtil.ItemCallback<Integer> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
         @Override
         public boolean areItemsTheSame(@NonNull Integer oldItem, @NonNull Integer newItem) {
             return false;
@@ -54,13 +55,14 @@ public class TileAdapter extends ListAdapter<Integer, TileAdapter.TileViewHolder
     }
 
     static class TileViewHolder extends RecyclerView.ViewHolder {
-        TextView tile;
+        final TextView tile;
 
         public TileViewHolder(@NonNull View itemView) {
             super(itemView);
             tile = itemView.findViewById(R.id.tile);
         }
 
+        @SuppressLint("SetTextI18n") // Android considère que les nombres hardcodes ne peuvent être traduits :/
         public void bind(Integer value) {
             switch (value) {
                 case 0:

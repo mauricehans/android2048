@@ -10,9 +10,9 @@ public class ScoreEntity {
     @PrimaryKey(autoGenerate = true)
     public int id;
     @NonNull @ColumnInfo(name="name")
-    public String name;
+    public final String name;
     @ColumnInfo(name="score")
-    public int score;
+    public final int score;
     public ScoreEntity(@NonNull String name, int score) {
         this.name = name;
         this.score = score;
