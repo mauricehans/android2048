@@ -22,6 +22,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <TextView
+        android:id="@+id/reset_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:background="#EEEEEE"
+        android:layout_gravity="center"
+        android:textSize="18sp"
+        android:text="RESET"
+        app:layout_constraintEnd_toEndOf="@+id/score_table"
+        app:layout_constraintTop_toTopOf="@id/score_title"
+        app:layout_constraintBottom_toBottomOf="@id/score_title"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/score_table"
         android:layout_width="0dp"

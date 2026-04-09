@@ -25,19 +25,21 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.android2048.scoreBD.AppDB;
-import com.example.android2048.scoreBD.ScoreDAO;
 import com.example.android2048.scoreBD.ScoreEntity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+
+import kotlin.coroutines.CoroutineContext;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private Map jeu;
     private TileAdapter adapter;
-    private TextView scoreView, bestView, scoreTableView;
+    private TextView scoreView, bestView, scoreTableView, resumeGameView;
     private int bestScore;
     private GestureDetector gestureDetector;
 
@@ -59,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private void resumeGameDialog(Map jeu, int score, String strMat) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Resume ?")
-                .setMessage("Voulez-vous reprendre la partie ?")
+                .setMessage("Voulez-vous reprendre la dernière partie ?")
                 .setPositiveButton("Oui", (dialog, which) -> {
                     assert strMat != null;
                     jeu.stringToDeep(strMat);
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void afficherObjectif(int atteint, int prochain) {
         new AlertDialog.Builder(this)
-                .setTitle("🎉 Objectif atteint !")
+                .setTitle("Objectif atteint !")
                 .setMessage("Bravo ! Tu as atteint un score de " + atteint + " !\n\n"
                         + "Nouvel objectif : " + prochain)
                 .setPositiveButton("Continuer", null)
@@ -98,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     private void afficherGameOver(int finalScore) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("GAME OVER");
-        builder.setMessage("Votre score : " + finalScore + "\nEntrez vos initiales (3 lettres) :");
+        builder.setMessage("Votre score : " + finalScore + "\nEntrez vos initiales (3 caractères) :");
 
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
@@ -125,6 +127,37 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+    private void debug_game() throws InterruptedException {
+        Random rand = new Random();
+        while (jeu.peutJouer()) {
+            rand.ints(0, 4);
+            switch (rand.nextInt(4)) {
+                case 0:
+                    jeu.gauche();
+                    break;
+                case 1:
+                    jeu.droite();
+                    break;
+                case 2:
+                    jeu.haut();
+                    break;
+                case 3:
+                    jeu.bas();
+                    break;
+            }
+            if (jeu.objectifAtteint) {
+                int objectifAtteint = jeu.objectif;
+                jeu.objectif *= 2;
+                jeu.objectifAtteint = false;
+                afficherObjectif(objectifAtteint, jeu.objectif);
+            } else if (!jeu.peutJouer()) {
+                afficherGameOver(jeu.score);
+            }
+            updateBoardUI();
+            updateScoreUI();
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,8 +176,6 @@ public class MainActivity extends AppCompatActivity {
         int score = gameSave.getInt("score", 0);
         bestScore = gameSave.getInt("best_score", 0);
         String strMat = gameSave.getString("jeu", null);
-        AppDB db = AppDB.getInstance(getApplicationContext());
-        ScoreDAO DAO = db.scoreDAO();
         /* **** PERSISTANCE ***** */
 
         /* **** INIT **** */
@@ -153,9 +184,8 @@ public class MainActivity extends AppCompatActivity {
         bestView  = findViewById(R.id.best_value);
         bestView.setText(String.valueOf(bestScore));
         scoreTableView = findViewById(R.id.score_table_btn);
+        resumeGameView = findViewById(R.id.resume_game_btn);
         /* **** INIT **** */
-
-        resumeGameDialog(jeu, score, strMat);
 
         /* **** BOARD INIT **** */
         adapter = new TileAdapter();
@@ -166,6 +196,12 @@ public class MainActivity extends AppCompatActivity {
         updateBoardUI();
         updateScoreUI();
         /* **** BOARD INIT **** */
+
+        /*try {
+            debug_game();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }*/
 
         /* **** SWIPE CONTROL **** */
         // LISTENER
@@ -204,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
                             jeu.objectifAtteint = false;
                             afficherObjectif(objectifAtteint, jeu.objectif);
                         } else if (!jeu.peutJouer()) {
-                            afficherGameOver(score);
+                            afficherGameOver(jeu.score);
                         }
                     }
                     return true;
@@ -213,10 +249,10 @@ public class MainActivity extends AppCompatActivity {
         /* **** SWIPE CONTROL **** */
 
         /* **** MENU CONTROLS **** */
+        resumeGameView.setOnClickListener(v -> resumeGameDialog(jeu, score, strMat));
         scoreTableView.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ScoreActivity.class);
             startActivity(intent);
-            finish();
         });
     }
 

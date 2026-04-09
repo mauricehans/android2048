@@ -15,7 +15,7 @@ public interface ScoreDAO {
     List<ScoreEntity> getScores(int limit);
     @Query("DELETE FROM score")
     void deleteAll();
-    @Query("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='score'")
+    @Query("DELETE FROM sqlite_sequence WHERE name='score'")
     void resetId();
     @Transaction // Indique qu'on execute sur un thread secondaire
     default void truncateTable() {
