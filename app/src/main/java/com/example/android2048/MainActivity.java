@@ -2,10 +2,15 @@ package com.example.android2048;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -21,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.android2048.scoreBD.AppDB;
 import com.example.android2048.scoreBD.ScoreDAO;
+import com.example.android2048.scoreBD.ScoreEntity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Map jeu;
     private TileAdapter adapter;
-    private TextView scoreView, bestView;
+    private TextView scoreView, bestView, scoreTableView;
     private int bestScore;
     private GestureDetector gestureDetector;
 
@@ -76,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void afficherGameOver() {
+    /*private void afficherGameOver() {
         new AlertDialog.Builder(this)
                 .setTitle("💀 Game Over")
                 .setMessage("Plus aucun mouvement possible.\nScore final : " + jeu.score)
@@ -87,6 +93,36 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setCancelable(false)
                 .show();
+    }*/
+
+    private void afficherGameOver(int finalScore) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("GAME OVER");
+        builder.setMessage("Votre score : " + finalScore + "\nEntrez vos initiales (3 lettres) :");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        input.setFilters(new InputFilter[] { new InputFilter.LengthFilter(3) });
+        input.setGravity(Gravity.CENTER);
+        builder.setView(input);
+
+        builder.setPositiveButton("Enregistrer", (dialog, which) -> {
+            String name = input.getText().toString().trim().toUpperCase();
+            if (name.isEmpty()) name = "AAA";
+            saveScore(name, finalScore);
+            jeu = new Map();
+            updateBoardUI();
+            updateScoreUI();
+        });
+        builder.setCancelable(false);
+        builder.show();
+    }
+
+    private void saveScore(String name, int score) {
+        new Thread(() -> {
+            AppDB db = AppDB.getInstance(getApplicationContext());
+            db.scoreDAO().insert(new ScoreEntity(name, score));
+        }).start();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -116,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
         scoreView = findViewById(R.id.score_value);
         bestView  = findViewById(R.id.best_value);
         bestView.setText(String.valueOf(bestScore));
+        scoreTableView = findViewById(R.id.score_table_btn);
         /* **** INIT **** */
 
         resumeGameDialog(jeu, score, strMat);
@@ -167,13 +204,20 @@ public class MainActivity extends AppCompatActivity {
                             jeu.objectifAtteint = false;
                             afficherObjectif(objectifAtteint, jeu.objectif);
                         } else if (!jeu.peutJouer()) {
-                            afficherGameOver();
+                            afficherGameOver(score);
                         }
                     }
                     return true;
                 }
             });
         /* **** SWIPE CONTROL **** */
+
+        /* **** MENU CONTROLS **** */
+        scoreTableView.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ScoreActivity.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     @Override
