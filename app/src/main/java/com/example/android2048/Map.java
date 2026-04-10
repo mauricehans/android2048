@@ -1,5 +1,7 @@
 package com.example.android2048;
 
+import androidx.annotation.NonNull;
+
 import java.util.Random;
 
 public class Map {
@@ -21,8 +23,14 @@ public class Map {
         matrice[i2][j2] = choisirValeur(rand);
     }
 
-    private int choisirValeur(Random rand) {
-        return rand.nextInt(10) < 9 ? 2 : 4;
+    private int choisirValeur(@NonNull Random rand) {
+        double prob4 = 0.1 + 0.4 * Math.log(score + 1) / Math.log(2049);
+
+        if (rand.nextDouble() < prob4) {
+            return 4;
+        }
+
+        return 2;
     }
 
     private void ajouterTuile() {
