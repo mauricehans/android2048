@@ -4,4 +4,5 @@ import androidx.lifecycle.ViewModel;
 
 public class GameViewModel extends ViewModel {
     public Map jeu = new Map();
+    public boolean victoireAffichee = false;
 }

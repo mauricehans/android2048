@@ -52,8 +52,9 @@
                 android:textSize="14sp"
                 android:text="SCORE"/>
 
+            <!-- ID corrigé : tvScore (attendu par MainActivity.java) -->
             <TextView
-                android:id="@+id/score_value"
+                android:id="@+id/tvScore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
