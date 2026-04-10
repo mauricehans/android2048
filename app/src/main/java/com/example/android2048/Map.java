@@ -1,15 +1,12 @@
 package com.example.android2048;
 
-import androidx.annotation.NonNull;
-
 import java.util.Random;
 
 public class Map {
-    final int[][] matrice = new int[4][4];
+    int[][] matrice = new int[4][4];
     int score = 0;
-    int objectif = 2048;
-    boolean objectifAtteint = false;
 
+    // Constructeur normal : initialise 2 tuiles aléatoires
     public Map() {
         Random rand = new Random();
         int i1 = rand.nextInt(4);
@@ -23,7 +20,16 @@ public class Map {
         matrice[i2][j2] = choisirValeur(rand);
     }
 
-    private int choisirValeur(@NonNull Random rand) {
+    // Constructeur de restauration (ViewModel / onSaveInstanceState)
+    public Map(int[] flat, int score) {
+        this.score = score;
+        for (int i = 0; i < 4; i++)
+            for (int j = 0; j < 4; j++)
+                matrice[i][j] = flat[i * 4 + j];
+    }
+
+    // Probabilité logarithmique : 10% à score 0, 50% à score 2048
+    private int choisirValeur(Random rand) {
         double prob4 = 0.1 + 0.4 * Math.log(score + 1) / Math.log(2049);
 
         if (rand.nextDouble() < prob4) {
@@ -33,13 +39,7 @@ public class Map {
         return 2;
     }
 
-    private void ajouterTuile() {
-        boolean libre = false;
-        for (int[] row : matrice)
-            for (int v : row)
-                if (v == 0) { libre = true; break; }
-        if (!libre) return;
-
+    public void ajouterTuile() {
         Random rand = new Random();
         int i, j;
         do {
@@ -49,154 +49,118 @@ public class Map {
         matrice[i][j] = choisirValeur(rand);
     }
 
-    public boolean peutJouer() {
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++) {
-                if (matrice[i][j] == 0) return true;
-                if (j < 3 && matrice[i][j] == matrice[i][j + 1]) return true;
-                if (i < 3 && matrice[i][j] == matrice[i + 1][j]) return true;
-            }
-        return false;
-    }
-
-    private int[][] copier() {
-        int[][] c = new int[4][4];
-        for (int i = 0; i < 4; i++) c[i] = matrice[i].clone();
-        return c;
-    }
-
-    private boolean matricesEgales(int[][] a, int[][] b) {
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++)
-                if (a[i][j] != b[i][j]) return false;
-        return true;
-    }
-
-    public boolean gauche() {
-        int[][] avant = copier();
+    public void afficheterminal() {
+        System.out.println("┌────┬────┬────┬────┐");
         for (int i = 0; i < 4; i++) {
-            int[] ligne = new int[4];
-            int pos = 0;
-            for (int j = 0; j < 4; j++)
-                if (matrice[i][j] != 0) ligne[pos++] = matrice[i][j];
-            for (int j = 0; j < 3; j++) {
-                if (ligne[j] != 0 && ligne[j] == ligne[j + 1]) {
-                    ligne[j] *= 2;
-                    score += ligne[j];
-                    if (!objectifAtteint && score >= objectif)
-                        objectifAtteint = true;
-                    ligne[j + 1] = 0;
-                    j++;
-                }
+            System.out.print("│");
+            for (int j = 0; j < 4; j++) {
+                String val = matrice[i][j] == 0 ? "    " : String.format("%4d", matrice[i][j]);
+                System.out.print(val);
+                System.out.print("│");
             }
-            int[] result = new int[4];
-            pos = 0;
-            for (int j = 0; j < 4; j++)
-                if (ligne[j] != 0) result[pos++] = ligne[j];
-            matrice[i] = result;
+            System.out.println();
+            if (i < 3) System.out.println("├────┼────┼────┼────┤");
         }
-        if (!matricesEgales(avant, matrice)) { ajouterTuile(); return true; }
-        return false;
+        System.out.println("└────┴────┴────┴────┘");
     }
 
-    public boolean droite() {
-        int[][] avant = copier();
+    public void droite() {
         for (int i = 0; i < 4; i++) {
             int[] ligne = new int[4];
             int pos = 3;
-            for (int j = 3; j >= 0; j--)
+            for (int j = 3; j >= 0; j--) {
                 if (matrice[i][j] != 0) ligne[pos--] = matrice[i][j];
+            }
             for (int j = 3; j > 0; j--) {
                 if (ligne[j] != 0 && ligne[j] == ligne[j - 1]) {
                     ligne[j] *= 2;
                     score += ligne[j];
-                    if (!objectifAtteint && score >= objectif)
-                        objectifAtteint = true;
                     ligne[j - 1] = 0;
                     j--;
                 }
             }
             int[] result = new int[4];
             pos = 3;
-            for (int j = 3; j >= 0; j--)
+            for (int j = 3; j >= 0; j--) {
                 if (ligne[j] != 0) result[pos--] = ligne[j];
+            }
             matrice[i] = result;
         }
-        if (!matricesEgales(avant, matrice)) { ajouterTuile(); return true; }
-        return false;
+        ajouterTuile();
     }
 
-    public boolean haut() {
-        int[][] avant = copier();
+    public void gauche() {
+        for (int i = 0; i < 4; i++) {
+            int[] ligne = new int[4];
+            int pos = 0;
+            for (int j = 0; j < 4; j++) {
+                if (matrice[i][j] != 0) ligne[pos++] = matrice[i][j];
+            }
+            for (int j = 0; j < 3; j++) {
+                if (ligne[j] != 0 && ligne[j] == ligne[j + 1]) {
+                    ligne[j] *= 2;
+                    score += ligne[j];
+                    ligne[j + 1] = 0;
+                    j++;
+                }
+            }
+            int[] result = new int[4];
+            pos = 0;
+            for (int j = 0; j < 4; j++) {
+                if (ligne[j] != 0) result[pos++] = ligne[j];
+            }
+            matrice[i] = result;
+        }
+        ajouterTuile();
+    }
+
+    public void haut() {
         for (int j = 0; j < 4; j++) {
             int[] col = new int[4];
             int pos = 0;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++) {
                 if (matrice[i][j] != 0) col[pos++] = matrice[i][j];
+            }
             for (int i = 0; i < 3; i++) {
                 if (col[i] != 0 && col[i] == col[i + 1]) {
                     col[i] *= 2;
                     score += col[i];
-                    if (!objectifAtteint && score >= objectif)
-                        objectifAtteint = true;
                     col[i + 1] = 0;
                     i++;
                 }
             }
             int[] result = new int[4];
             pos = 0;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++) {
                 if (col[i] != 0) result[pos++] = col[i];
+            }
             for (int i = 0; i < 4; i++) matrice[i][j] = result[i];
         }
-        if (!matricesEgales(avant, matrice)) { ajouterTuile(); return true; }
-        return false;
+        ajouterTuile();
     }
 
-    public boolean bas() {
-        int[][] avant = copier();
+    public void bas() {
         for (int j = 0; j < 4; j++) {
             int[] col = new int[4];
             int pos = 3;
-            for (int i = 3; i >= 0; i--)
+            for (int i = 3; i >= 0; i--) {
                 if (matrice[i][j] != 0) col[pos--] = matrice[i][j];
+            }
             for (int i = 3; i > 0; i--) {
                 if (col[i] != 0 && col[i] == col[i - 1]) {
                     col[i] *= 2;
                     score += col[i];
-                    if (!objectifAtteint && score >= objectif)
-                        objectifAtteint = true;
                     col[i - 1] = 0;
                     i--;
                 }
             }
             int[] result = new int[4];
             pos = 3;
-            for (int i = 3; i >= 0; i--)
+            for (int i = 3; i >= 0; i--) {
                 if (col[i] != 0) result[pos--] = col[i];
+            }
             for (int i = 0; i < 4; i++) matrice[i][j] = result[i];
         }
-        if (!matricesEgales(avant, matrice)) { ajouterTuile(); return true; }
-        return false;
-    }
-
-    public void stringToDeep(String strMat) {// 1. Nettoyage : On enlève les doubles crochets extérieurs [[ et ]]
-        String cleaned = strMat.replace("[[", "").replace("]]", "").replace(" ", "");
-        String[] lignes = cleaned.split("\\], \\[" );
-
-        if (lignes.length == 1) {
-            lignes = cleaned.split("\\],\\[");
-        }
-
-        for (int i = 0; i < lignes.length && i < 4; i++) {
-            String[] valeurs = lignes[i].split(",");
-            for (int j = 0; j < valeurs.length && j < 4; j++) {
-                try {
-                    this.matrice[i][j] = Integer.parseInt(valeurs[j]);
-                } catch (NumberFormatException e) {
-                    this.matrice[i][j] = 0; // Sécurité si le String est corrompu
-                }
-            }
-        }
+        ajouterTuile();
     }
 }
